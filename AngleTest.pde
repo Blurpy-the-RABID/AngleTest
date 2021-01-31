@@ -58,8 +58,8 @@ void setup() {
   gray = color(radians(0),0,50,100);
   clear = color(radians(0),100,100,0);
   
-  lineHue = new AngleScroller1(black, 3, midWidth, midHeight, circleRadius, deg1, deg2, cycleLength, angleMult, false);
-  // AngleScroller1 (color colorLine, int weightLine, float Xpos, float Ypos, float lengthLine, float firstAngle, float lastAngle, float lengthCycle, float multi, boolean modePercent)
+  lineHue = new AngleScroller1(black, 3, midWidth, midHeight, circleRadius, deg1, deg2, cycleLength, angleMult, false, false);
+  // AngleScroller1 (color colorLine, int weightLine, float Xpos, float Ypos, float lengthLine, float firstAngle, float lastAngle, float lengthCycle, float multi, boolean modePercent, boolean animated)
 }
 //========================================================================================================================================================
 
@@ -72,8 +72,8 @@ void draw() {
   text("lineHue.getCurrentFrCnt() = " + lineHue.getCurrentFrCnt(), 10, 40);
   text("angleMult = " + angleMult, 10, 50);
   
-  text("lineHue.getdAngle1() = " + lineHue.getdAngle1(), 250, 10);
-  text("lineHue.getdAngle2() = " + lineHue.getdAngle2(), 250, 20);
+  text("lineHue.getdAngle1() = " + lineHue.getDNewAngle1(), 250, 10);
+  text("lineHue.getdAngle2() = " + lineHue.getDNewAngle2(), 250, 20);
   text("lineHue.getCurrentAngleR() = " + lineHue.getCurrentAngleR(), 250, 30);
   text("lineHue.getTargetAngleR() = " + lineHue.getTargetAngleR(), 250, 40);
   text("lineHue.getAngleIncrR() = " + lineHue.getAngleIncrR(), 250, 50);
@@ -129,7 +129,7 @@ void mousePressed() {
     mX = mouseX;
     mY = mouseY;
     float mouseAngle = getAngle(midWidth, midHeight, mX, mY);
-    lineHue.setdAngle1(mouseAngle);
+    lineHue.setDNewAngle1(mouseAngle);
   }
   
   // Right mouse button will set the angle from the centerpoint to the mouse cursor to lineHue's dAngle2 variable.
@@ -137,7 +137,7 @@ void mousePressed() {
     mX = mouseX;
     mY = mouseY;
     float mouseAngle = getAngle(midWidth, midHeight, mX, mY);
-    lineHue.setdAngle2(mouseAngle);
+    lineHue.setDNewAngle2(mouseAngle);
   }
 }
 

@@ -6,18 +6,19 @@ class AngleScroller1 {
   color lineColor;
   int lineWeight = 1;
   float posX, posY, pX, pY, lineLength; 
-  float dAngle1, dAngle2, currentAngleD, targetAngleD, angleIncrD, angleRangeD, deltaD;
-  float rAngle1, rAngle2, currentAngleR, targetAngleR, angleIncrR, angleRangeR, deltaR;
+  float dCurrentAngle1, dNewAngle1, dCurrentAngle2, dNewAngle2, currentAngleD, targetAngleD, angleIncrD, angleRangeD, deltaD;
+  float rCurrentAngle1, rNewAngle1, rCurrentAngle2, rNewAngle2, currentAngleR, targetAngleR, angleIncrR, angleRangeR, deltaR;
   float cycleLength;
   int currentFrCnt = 0;
   float multiplier = 1.0;
   boolean percentMode = false;
   boolean advanceAng1to2 = true;
+  boolean animateModeOn = true; // This variable will toggle On/Off whether or not the rendered line animates between  dNewAngle1 & dNewAngle2 during each cycle.
   
 //--------------------------------------------------------------------------
 // BEGIN Constructor Definition
 //--------------------------------------------------------------------------
-  AngleScroller1 (color colorLine, int weightLine, float Xpos, float Ypos, float lengthLine, float firstAngle, float lastAngle, float lengthCycle, float multi, boolean modePercent) {
+  AngleScroller1 (color colorLine, int weightLine, float Xpos, float Ypos, float lengthLine, float firstAngle, float lastAngle, float lengthCycle, float multi, boolean modePercent, boolean animated) {
     lineColor = colorLine;
     lineWeight = weightLine;
     posX = Xpos;
@@ -28,32 +29,36 @@ class AngleScroller1 {
     currentAngleD = 0; // We always start currentAngleD at 0°.
     cycleLength = lengthCycle;
     multiplier = multi;
+    animateModeOn = animated;
     
-    dAngle1 = firstAngle; // 10
-    dAngle2 = lastAngle; // -90
+    dNewAngle1 = firstAngle; // 10
+    dNewAngle2 = lastAngle; // -90
     
     // Calculate which of the provided angles is larger, and assign values to the appropriate variables.
     int largerValue = getLargerValue(firstAngle, lastAngle);
     switch(largerValue) {
       // firstAngle is equal to lastAngle (ex. firstAngle = 10, lastAngle = 10)
       case 0:
-        dAngle1 = firstAngle; // 10
-        dAngle2 = lastAngle; // -90
-        targetAngleD = (dAngle2 * multiplier);
+        dNewAngle1 = firstAngle; // 10
+        dNewAngle2 = lastAngle; // -90
+        targetAngleD = (dNewAngle2 * multiplier);
         break;
       // firstAngle is larger than lastAngle (ex. firstAngle = -90, lastAngle = 10)
       case 1:
-        dAngle1 = firstAngle; // -90
-        dAngle2 = lastAngle; // 10
-        targetAngleD = (dAngle1 * multiplier);
+        dNewAngle1 = firstAngle; // -90
+        dNewAngle2 = lastAngle; // 10
+        targetAngleD = (dNewAngle1 * multiplier);
         break;
       // firstAngle is less than lastAngle (ex. firstAngle = 10, lastAngle = -90)
       case 2:
-        dAngle1 = lastAngle; // 10
-        dAngle2 = firstAngle; // -90
-        targetAngleD = (dAngle2 * multiplier);
+        dNewAngle1 = lastAngle; // 10
+        dNewAngle2 = firstAngle; // -90
+        targetAngleD = (dNewAngle2 * multiplier);
         break;
     }
+    
+    dCurrentAngle1 = dNewAngle1;
+    dCurrentAngle2 = dNewAngle2;
     
     percentMode = modePercent;
     deltaD = ((((targetAngleD - currentAngleD) + 540) % 360) - 180); // -90
@@ -62,8 +67,8 @@ class AngleScroller1 {
 //    angleIncrD =  (angleRangeD / cycleLength); // 2.67857...
     
     // Radian conversion calculations
-    rAngle1 = radians(dAngle1);
-    rAngle2 = radians(dAngle2);
+    rNewAngle1 = radians(dNewAngle1);
+    rNewAngle2 = radians(dNewAngle2);
     currentAngleR = radians(currentAngleD);
     targetAngleR = radians(targetAngleD);
     angleIncrR = radians(angleIncrD);
@@ -78,60 +83,91 @@ class AngleScroller1 {
 // BEGIN Function Definitions
 //--------------------------------------------------------------------------
   // This function will recalculate all variables associated with determining what angleIncrD should be set to.
-  // This function should be executed whenever the values of dAngle1 or dAngle2 are updated by the User.
+  // This function should be executed whenever the values of dNewAngle1 or dNewAngle2 are updated by the User.
   void recalcAngleParams() {
-    // When advanceAng1to2 is set to True, we will advance from the currentAngleD towards (dAngle2 * multiplier).
+    dCurrentAngle1 = dNewAngle1;
+    dCurrentAngle2 = dNewAngle2;
+    
+    // When advanceAng1to2 is set to True, we will advance from the currentAngleD towards (dNewAngle2 * multiplier).
     if (advanceAng1to2 == true) {
-        targetAngleD = (dAngle2 * multiplier);
-        deltaD = ((((targetAngleD - currentAngleD) + 540) % 360) - 180);
-        angleRangeD = abs(deltaD);
-        angleIncrD =  (angleRangeD / cycleLength);
-      }
+      targetAngleD = (dCurrentAngle2 * multiplier);
+      deltaD = ((((targetAngleD - currentAngleD) + 540) % 360) - 180);
+      angleRangeD = abs(deltaD);
+      angleIncrD =  (angleRangeD / cycleLength);
+    }
     
     // When advanceAng1to2 is set to False, we will change the value for targetAngleD, and then we'll advance from the currentAngleD towards the new targetAngleD.
     else if (advanceAng1to2 == false) {
-      targetAngleD = dAngle1;
+      targetAngleD = dCurrentAngle1;
       deltaD = ((((targetAngleD - currentAngleD) + 540) % 360) - 180);
       angleRangeD = abs(deltaD);
       angleIncrD =  (angleRangeD / cycleLength);
     }
   } //<>//
   
-  // This function updates all relevant variable values based on the current values for dAngle1 & dAngle2, and advances currentAngleD towards targetAngleD.
+  // This function updates all relevant variable values based on the current values for dNewAngle1 & dNewAngle2, and advances currentAngleD towards targetAngleD.
   void update() {
-    // When advanceAng1to2 is set to True, we will advance from the currentAngleD towards (dAngle2 * multiplier).
-    if (advanceAng1to2 == true) {
-      currentAngleD += angleIncrD;
-      currentFrCnt += 1; //<>//
-      // If currentFrCnt becomes equal to the value of cycleLength, it's time to reverse directions.
-      if (currentFrCnt >= cycleLength) {
-        currentFrCnt = int(cycleLength);
-        advanceAng1to2 = false;
-        recalcAngleParams();
-        
-//        currentAngleD = targetAngleD; // Ensure that we always start at the right point before we reverse directions.
-        //targetAngleD = dAngle1;
-        //deltaD = ((((targetAngleD - currentAngleD) + 540) % 360) - 180);
-        //angleRangeD = abs(deltaD);
-        //angleIncrD =  (angleRangeD / cycleLength); //<>//
+    if (animateModeOn == true) {
+      // When advanceAng1to2 is set to True, we will advance from the currentAngleD towards (dNewAngle2 * multiplier).
+      if (advanceAng1to2 == true) {
+        currentAngleD += angleIncrD;
+        currentFrCnt += 1; //<>//
+        // If currentFrCnt becomes equal to the value of cycleLength, it's time to reverse directions.
+        if (currentFrCnt >= cycleLength) {
+          currentFrCnt = int(cycleLength);
+          advanceAng1to2 = false;
+          recalcAngleParams();
+          
+  //        currentAngleD = targetAngleD; // Ensure that we always start at the right point before we reverse directions.
+          //targetAngleD = dNewAngle1;
+          //deltaD = ((((targetAngleD - currentAngleD) + 540) % 360) - 180);
+          //angleRangeD = abs(deltaD);
+          //angleIncrD =  (angleRangeD / cycleLength); //<>//
+        }
+      }
+      
+      // When advanceAng1to2 is set to False, we will change the value for targetAngleD, and then we'll advance from the currentAngleD towards the new targetAngleD.
+      else if (advanceAng1to2 == false) {
+        currentAngleD -= angleIncrD;
+        currentFrCnt -= 1;
+        // If currentFrCnt reaches zero, then it's time to reverse direction again.
+        if (currentFrCnt <= 0) {
+          currentFrCnt = 0;
+          advanceAng1to2 = true;
+          recalcAngleParams();
+          
+  //        currentAngleD = targetAngleD; // Ensure that we always start at the right point before we reverse directions.
+          //targetAngleD = (dNewAngle2 * multiplier);
+          //deltaD = ((((targetAngleD - currentAngleD) + 540) % 360) - 180);
+          //angleRangeD = abs(deltaD);
+          //angleIncrD =  (angleRangeD / cycleLength);
+        }
       }
     }
     
-    // When advanceAng1to2 is set to False, we will change the value for targetAngleD, and then we'll advance from the currentAngleD towards the new targetAngleD.
-    else if (advanceAng1to2 == false) {
-      currentAngleD -= angleIncrD;
-      currentFrCnt -= 1;
-      // If currentFrCnt reaches zero, then it's time to reverse direction again.
-      if (currentFrCnt <= 0) {
-        currentFrCnt = 0;
-        advanceAng1to2 = true;
-        recalcAngleParams();
-        
-//        currentAngleD = targetAngleD; // Ensure that we always start at the right point before we reverse directions.
-        //targetAngleD = (dAngle2 * multiplier);
-        //deltaD = ((((targetAngleD - currentAngleD) + 540) % 360) - 180);
-        //angleRangeD = abs(deltaD);
-        //angleIncrD =  (angleRangeD / cycleLength);
+    // If animatedModeOn is set to False, then we don't want to animate the AngleScroller1 object; we simply want it to switch between dNewAngle1 & dNewAngle2 at the
+    // end of each cycle.
+    else if (animateModeOn == false) {
+      if (advanceAng1to2 == true) {
+        currentAngleD = dCurrentAngle1;
+        currentFrCnt += 1;
+        // If currentFrCnt becomes equal to the value of cycleLength, it's time to reverse directions.
+        if (currentFrCnt >= cycleLength) {
+          currentFrCnt = int(cycleLength);
+          advanceAng1to2 = false;
+          recalcAngleParams();
+        }
+      }
+      
+      else if (advanceAng1to2 == false) {
+        currentAngleD = dCurrentAngle2;
+        currentFrCnt -= 1;
+        // If currentFrCnt becomes equal to the value of cycleLength, it's time to reverse directions.
+        if (currentFrCnt <= 0) {
+          currentFrCnt = 0;
+          advanceAng1to2 = true;
+          recalcAngleParams();
+        }
       }
     }
   }
@@ -142,15 +178,15 @@ class AngleScroller1 {
     int largerValue = getLargerValue(angle1, angle2);
     
     switch(largerValue) {
-      // dAngle1 is equal to dAngle2 (ex. dAngle1 = 10, dAngle2 = 10)
+      // dNewAngle1 is equal to dNewAngle2 (ex. dNewAngle1 = 10, dNewAngle2 = 10)
       case 0:
         smallerAngle = angle2;
         break;
-      // dAngle1 is larger than dAngle2 (ex. dAngle1 = 150, dAngle2 = 10)
+      // dNewAngle1 is larger than dNewAngle2 (ex. dNewAngle1 = 150, dNewAngle2 = 10)
       case 1:
         smallerAngle = angle2;
         break;
-      // dAngle1 is less than dAngle2 (ex. dAngle1 = 10, dAngle2 = 150)
+      // dNewAngle1 is less than dNewAngle2 (ex. dNewAngle1 = 10, dNewAngle2 = 150)
       case 2:
         smallerAngle = angle1;
         break;
@@ -165,15 +201,15 @@ class AngleScroller1 {
     int largerValue = getLargerValue(angle1, angle2);
     
     switch(largerValue) {
-      // dAngle1 is equal to dAngle2 (ex. dAngle1 = 10, dAngle2 = 10)
+      // dNewAngle1 is equal to dNewAngle2 (ex. dNewAngle1 = 10, dNewAngle2 = 10)
       case 0:
         largerAngle = angle1;
         break;
-      // dAngle1 is larger than dAngle2 (ex. dAngle1 = 150, dAngle2 = 10)
+      // dNewAngle1 is larger than dNewAngle2 (ex. dNewAngle1 = 150, dNewAngle2 = 10)
       case 1:
         largerAngle = angle1;
         break;
-      // dAngle1 is less than dAngle2 (ex. dAngle1 = 10, dAngle2 = 150)
+      // dNewAngle1 is less than dNewAngle2 (ex. dNewAngle1 = 10, dNewAngle2 = 150)
       case 2:
         largerAngle = angle2;
         break;
@@ -184,8 +220,8 @@ class AngleScroller1 {
   
   // This function will render a line at the current angle specified by currentAngleD (which gets converted to radians).
   void render() {
-//    rAngle1 = radians(dAngle1);
-//    rAngle2 = radians(dAngle2); 
+//    rNewAngle1 = radians(dNewAngle1);
+//    rNewAngle2 = radians(dNewAngle2); 
     currentAngleR = radians(currentAngleD);
 //    targetAngleR = radians(targetAngleD);
 //    angleIncrR = radians(angleIncrD);
@@ -284,22 +320,22 @@ class AngleScroller1 {
     return deltaR;
   }
   
-  void setdAngle1(float newAngle) {
-    dAngle1 = newAngle;
-    recalcAngleParams();
+  void setDNewAngle1(float newAngle) {
+    dNewAngle1 = newAngle;
+//    recalcAngleParams();
   }
   
-  float getdAngle1() {
-    return dAngle1;
+  float getDNewAngle1() {
+    return dNewAngle1;
   }
   
-  void setdAngle2(float newAngle) {
-    dAngle2 = newAngle;
-    recalcAngleParams();
+  void setDNewAngle2(float newAngle) {
+    dNewAngle2 = newAngle;
+//    recalcAngleParams();
   }
   
-  float getdAngle2() {
-    return dAngle2;
+  float getDNewAngle2() {
+    return dNewAngle2;
   }
 //--------------------------------------------------------------------------
 // END OF Function Definitions
