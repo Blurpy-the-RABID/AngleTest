@@ -20,7 +20,7 @@ float fps = (3600 / bpm);
 int cycleLength = int(fps); // This variable will be used to set how many frames will make up a single refresh cycle.
 int currentFrCnt = 0; // This variable will be used to count alongside of frameCount to track when a refresh cycle should restart.
 
-AngleScroller1 lineHue;
+AngleScroller1 lineHue1, lineHue2;
 
 float speed = 0.015;
 float a;
@@ -58,7 +58,8 @@ void setup() {
   gray = color(radians(0),0,50,100);
   clear = color(radians(0),100,100,0);
   
-  lineHue = new AngleScroller1(black, 3, midWidth, midHeight, circleRadius, deg1, deg2, cycleLength, angleMult, false, false);
+  lineHue1 = new AngleScroller1(black, 3, midWidth, midHeight, circleRadius, deg1, deg2, cycleLength, angleMult, false, true);
+  lineHue2 = new AngleScroller1(black, 3, midWidth, midHeight, circleRadius, deg1, deg2, cycleLength, angleMult, false, false);
   // AngleScroller1 (color colorLine, int weightLine, float Xpos, float Ypos, float lengthLine, float firstAngle, float lastAngle, float lengthCycle, float multi, boolean modePercent, boolean animated)
 }
 //========================================================================================================================================================
@@ -68,25 +69,25 @@ void draw() {
   fill(0,0,0,100);
   text("a = " + a, 10, 10);
   text("currentFrCnt = " + currentFrCnt, 10, 20);
-  text("lineHue.getCycleLength() = " + lineHue.getCycleLength(), 10, 30);
-  text("lineHue.getCurrentFrCnt() = " + lineHue.getCurrentFrCnt(), 10, 40);
+  text("lineHue1.getCycleLength() = " + lineHue1.getCycleLength(), 10, 30);
+  text("lineHue1.getCurrentFrCnt() = " + lineHue1.getCurrentFrCnt(), 10, 40);
   text("angleMult = " + angleMult, 10, 50);
   
-  text("lineHue.getdAngle1() = " + lineHue.getDNewAngle1(), 250, 10);
-  text("lineHue.getdAngle2() = " + lineHue.getDNewAngle2(), 250, 20);
-  text("lineHue.getCurrentAngleR() = " + lineHue.getCurrentAngleR(), 250, 30);
-  text("lineHue.getTargetAngleR() = " + lineHue.getTargetAngleR(), 250, 40);
-  text("lineHue.getAngleIncrR() = " + lineHue.getAngleIncrR(), 250, 50);
-  text("lineHue.getDeltaR() = " + lineHue.getDeltaR(), 250, 60);
+  text("lineHue1.getdAngle1() = " + lineHue1.getDNewAngle1(), 250, 10);
+  text("lineHue1.getdAngle2() = " + lineHue1.getDNewAngle2(), 250, 20);
+  text("lineHue1.getCurrentAngleR() = " + lineHue1.getCurrentAngleR(), 250, 30);
+  text("lineHue1.getTargetAngleR() = " + lineHue1.getTargetAngleR(), 250, 40);
+  text("lineHue1.getAngleIncrR() = " + lineHue1.getAngleIncrR(), 250, 50);
+  text("lineHue1.getDeltaR() = " + lineHue1.getDeltaR(), 250, 60);
   
-  text("lineHue.getCurrentAngleD() = " + lineHue.getCurrentAngleD(), 250, 80);
-  text("lineHue.getTargetAngleD() = " + lineHue.getTargetAngleD(), 250, 90);
-  text("lineHue.getAngleIncrD() = " + lineHue.getAngleIncrD(), 250, 100);
-  text("lineHue.getDeltaD() = " + lineHue.getDeltaD(), 250, 110);
-  text("lineHue.getAngleRangeD() = " + lineHue.getAngleRangeD(), 250, 120);
+  text("lineHue1.getCurrentAngleD() = " + lineHue1.getCurrentAngleD(), 250, 80);
+  text("lineHue1.getTargetAngleD() = " + lineHue1.getTargetAngleD(), 250, 90);
+  text("lineHue1.getAngleIncrD() = " + lineHue1.getAngleIncrD(), 250, 100);
+  text("lineHue1.getDeltaD() = " + lineHue1.getDeltaD(), 250, 110);
+  text("lineHue1.getAngleRangeD() = " + lineHue1.getAngleRangeD(), 250, 120);
   
-//  text("lineHue.getPX() = " + lineHue.getPX(), 250, 50);
-//  text("lineHue.getPY() = " + lineHue.getPY(), 250, 60);
+//  text("lineHue1.getPX() = " + lineHue1.getPX(), 250, 50);
+//  text("lineHue1.getPY() = " + lineHue1.getPY(), 250, 60);
   
   noFill();
   stroke(radians(270),100,100,100);
@@ -111,12 +112,16 @@ void draw() {
   // If currentFrCnt becomes equal to our refresh cycle's length, then we'll reset it to zero and execute our refresh events.
   if (currentFrCnt >= cycleLength) {
     currentFrCnt = 0;
-//    lineHue.update();
+//    lineHue1.update();
   }
   
-  lineHue.setMultiplier(angleMult);
-  lineHue.update(); //<>//
-  lineHue.render();
+  lineHue1.setMultiplier(angleMult); //<>//
+  lineHue1.update();
+  lineHue1.render();
+  
+  lineHue2.setMultiplier(angleMult);
+  lineHue2.update();
+  lineHue2.render();
 }
 //========================================================================================================================================================
 float getAngle(float pX1,float pY1, float pX2,float pY2){
@@ -124,20 +129,22 @@ float getAngle(float pX1,float pY1, float pX2,float pY2){
 }
 
 void mousePressed() {
-  // Left mouse button will set the angle from the centerpoint to the mouse cursor to lineHue's dAngle1 variable.
+  // Left mouse button will set the angle from the centerpoint to the mouse cursor to lineHue1's dAngle1 variable.
   if (mouseButton == LEFT) {
     mX = mouseX;
     mY = mouseY;
     float mouseAngle = getAngle(midWidth, midHeight, mX, mY);
-    lineHue.setDNewAngle1(mouseAngle);
+    lineHue1.setDNewAngle1(mouseAngle);
+    lineHue2.setDNewAngle1(mouseAngle);
   }
   
-  // Right mouse button will set the angle from the centerpoint to the mouse cursor to lineHue's dAngle2 variable.
+  // Right mouse button will set the angle from the centerpoint to the mouse cursor to lineHue1's dAngle2 variable.
   else if (mouseButton == RIGHT) {
     mX = mouseX;
     mY = mouseY;
     float mouseAngle = getAngle(midWidth, midHeight, mX, mY);
-    lineHue.setDNewAngle2(mouseAngle);
+    lineHue1.setDNewAngle2(mouseAngle);
+    lineHue2.setDNewAngle2(mouseAngle);
   }
 }
 
