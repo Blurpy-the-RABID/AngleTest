@@ -72,6 +72,7 @@ void draw() {
   text("lineHue1.getCycleLength() = " + lineHue1.getCycleLength(), 10, 30);
   text("lineHue1.getCurrentFrCnt() = " + lineHue1.getCurrentFrCnt(), 10, 40);
   text("angleMult = " + angleMult, 10, 50);
+  text("lineHue1.getTrueCurrentAngleD() = " + lineHue1.getTrueCurrentAngleD(), 10, 60);
   
   text("lineHue1.getdAngle1() = " + lineHue1.getDNewAngle1(), 250, 10);
   text("lineHue1.getdAngle2() = " + lineHue1.getDNewAngle2(), 250, 20);

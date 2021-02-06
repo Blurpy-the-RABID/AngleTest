@@ -12,6 +12,9 @@ class AngleScroller1 {
   float posX, posY, pX, pY, lineLength; 
   float dCurrentAngle1, dNewAngle1, dCurrentAngle2, dNewAngle2, currentAngleD, targetAngleD, angleIncrD, angleRangeD, deltaD;
   float rCurrentAngle1, rNewAngle1, rCurrentAngle2, rNewAngle2, currentAngleR, targetAngleR, angleIncrR, angleRangeR, deltaR;
+  // This variable will be used in converting the value of currentAngleD into a value between 0 and 360, as opposed to a value that goes from 0 to 180, and then
+  // from -179.999 back to 0.
+  float trueCurrentAngleD;
   float cycleLength;
   int currentFrCnt = 0;
   float multiplier = 1.0;
@@ -25,12 +28,12 @@ class AngleScroller1 {
   AngleScroller1 (color colorLine, int weightLine, float Xpos, float Ypos, float lengthLine, float firstAngle, float lastAngle, float lengthCycle, float multi, boolean modePercent, boolean animated) {
     lineColor = colorLine;
     lineWeight = weightLine;
+    currentAngleD = 0; // We always start currentAngleD at 0°.
     posX = Xpos;
     posY = Ypos;
     pX = posX + cos(currentAngleD) * circleRadius;
     pY = posY + sin(currentAngleD) * circleRadius;
     lineLength = lengthLine;
-    currentAngleD = 0; // We always start currentAngleD at 0°.
     cycleLength = lengthCycle;
     multiplier = multi;
     animateModeOn = animated;
@@ -45,19 +48,19 @@ class AngleScroller1 {
       case 0:
         dNewAngle1 = firstAngle; // 10
         dNewAngle2 = lastAngle; // -90
-        targetAngleD = (dNewAngle2 * multiplier);
+        targetAngleD = dNewAngle2;
         break;
       // firstAngle is larger than lastAngle (ex. firstAngle = -90, lastAngle = 10)
       case 1:
         dNewAngle1 = firstAngle; // -90
         dNewAngle2 = lastAngle; // 10
-        targetAngleD = (dNewAngle1 * multiplier);
+        targetAngleD = dNewAngle1;
         break;
       // firstAngle is less than lastAngle (ex. firstAngle = 10, lastAngle = -90)
       case 2:
         dNewAngle1 = lastAngle; // 10
         dNewAngle2 = firstAngle; // -90
-        targetAngleD = (dNewAngle2 * multiplier);
+        targetAngleD = dNewAngle2;
         break;
     }
     
@@ -66,10 +69,10 @@ class AngleScroller1 {
     dCurrentAngle2 = 0;
     
     percentMode = modePercent;
-    deltaD = ((((targetAngleD - currentAngleD) + 540) % 360) - 180); // -90
-    angleRangeD = abs(deltaD); // 90
-    angleIncrD =  (deltaD / cycleLength); // -1.60714...
-
+    deltaD = ((((targetAngleD - currentAngleD) + 540) % 360) - 180);
+    angleRangeD = abs(deltaD);
+    angleIncrD =  ((deltaD / cycleLength) * multiplier);
+    getTrueCurrentAngleD(); // Assigns a value to trueCurrentAngleD.
     
     // Radian conversion calculations
     rNewAngle1 = radians(dNewAngle1);
@@ -90,6 +93,19 @@ class AngleScroller1 {
 //--------------------------------------------------------------------------
 // BEGIN Function Definitions
 //--------------------------------------------------------------------------
+  // This method will convert the current value of currentAngleD into a value between 0 and 360, and then return it.
+  float getTrueCurrentAngleD() {
+    if (currentAngleD < 0) {
+      trueCurrentAngleD = ((180 + currentAngleD) + 180);
+    }
+    
+    else if (currentAngleD >= 0) {
+      trueCurrentAngleD = currentAngleD;
+    }
+    
+    return trueCurrentAngleD;
+  }
+  
   // This function will recalculate all variables associated with determining what angleIncrD should be set to.
   // This function should be executed whenever the values of dNewAngle1 or dNewAngle2 are updated by the User.
   void recalcAngleParams() {
