@@ -99,10 +99,10 @@ class AngleScroller1 {
     
     // When advanceAng1to2 is set to True, we will advance from the currentAngleD towards (dNewAngle2 * multiplier).
     if (advanceAng1to2 == true) {
-      targetAngleD = (dCurrentAngle2 * multiplier);
+      targetAngleD = dCurrentAngle2;
       deltaD = ((((targetAngleD - currentAngleD) + 540) % 360) - 180);
       angleRangeD = abs(deltaD);
-      angleIncrD =  (deltaD / cycleLength);
+      angleIncrD =  ((deltaD / cycleLength) * multiplier);
     } //<>//
     
     // When advanceAng1to2 is set to False, we will change the value for targetAngleD, and then we'll advance from the currentAngleD towards the new targetAngleD.
