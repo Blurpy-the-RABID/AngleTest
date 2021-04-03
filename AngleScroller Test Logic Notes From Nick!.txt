@@ -1,0 +1,24 @@
+delta = (((T - C) + 540) % 360) - 180
+T = Target Angle
+C = Current Angle
+
+Deals with circles and angles on said circle.
+Angle Range: 0-359
+Hue Range: [0 - 2 PI) (exclusive)
+Saturation Range:  0.0 - 1.0
+Brightness Range:  0.0 - 1.0
+Alpha Range:  0.0 - 1.0
+
+Orange = 30°
+Purple = 270°
+delta = (((270 - 30) + 540) % 360) - 180
+positive = turn right
+negative = turn left
+
+If it doesn't turn in the proper direction, reverse the - and + operations!
+
+NOTE:  % will divide and keep ONLY the remainder!
+
+See Discord notes from Nick!
+
+The SIGN (positive or negative - not SINE) of Delta designates the direction to turn in.

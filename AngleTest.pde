@@ -28,7 +28,8 @@ float a;
 
 void setup() {
   size(500, 500);
-  colorMode(HSB, TWO_PI, 1.0, 1.0, 1.0);
+  colorMode(HSB, 360.0, 1.0, 1.0, 1.0);
+//  colorMode(HSB, TWO_PI, 1.0, 1.0, 1.0);
   
   midWidth = (width / 2);
   midHeight = (height / 2);
@@ -123,6 +124,13 @@ void draw() {
   lineHue2.setMultiplier(angleMult);
   lineHue2.update();
   lineHue2.render();
+  
+  // Create Color Box which converts lineHue1's current TRUE Angle (0°-359.9999°) into a proper color value.
+  stroke(clr1);
+  strokeWeight(1);
+  fill(color(lineHue1.getTrueCurrentAngleD(),100,100,100));
+  rect(midWidth, midHeight, 30, 30);
+  noFill();
 }
 //========================================================================================================================================================
 float getAngle(float pX1,float pY1, float pX2,float pY2){
